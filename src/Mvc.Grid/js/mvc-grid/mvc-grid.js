@@ -537,6 +537,7 @@ class MvcGridPager {
         pager.showPageSizes = element.dataset.showPageSizes == "True";
         pager.rowsPerPage = element.querySelector(".mvc-grid-pager-rows");
         pager.currentPage = pager.pages.length ? element.querySelector(".active").dataset.page : "1";
+        pager.totalRows = element.querySelector(".mvc-grid-pager-totalRows").value;
 
         pager.cleanUp();
         pager.bind();
@@ -571,7 +572,10 @@ class MvcGridPager {
         }
 
         pager.rowsPerPage.addEventListener("change", () => {
-            pager.apply("1");
+            var totalPages = pager.totalRows / pager.rowsPerPage.value + ((pager.totalRows % pager.rowsPerPage.value) > 0 ? 1 : 0);
+            pager.currentPage = Math.min(totalPages, pager.currentPage);
+            pager.currentPage = Math.max(1, pager.currentPage);
+            pager.apply(pager.currentPage);
         });
     }
 }
@@ -854,11 +858,11 @@ class MvcGridFilter {
                     ${filter.renderFilter("first")}
                 </div>
                 ${filter.mode == "excel" && filter.type == "double"
-                    ? `${filter.renderOperator()}
+                ? `${filter.renderOperator()}
                     <div class="popup-filter">
                         ${filter.renderFilter("second")}
                     </div>`
-                    : ""}
+                : ""}
                 ${filter.renderActions()}`;
     }
     renderFilter(name) {
@@ -874,10 +878,10 @@ class MvcGridFilter {
                     </select>
                 </div>
                 <div class="popup-group">${options
-                    ? `<select class="mvc-grid-value" data-filter="${name}"${multiple}>
+                ? `<select class="mvc-grid-value" data-filter="${name}"${multiple}>
                           ${options.innerHTML}
                        </select>`
-                    : `<input class="mvc-grid-value" data-filter="${name}">`}
+                : `<input class="mvc-grid-value" data-filter="${name}">`}
                 </div>`;
     }
     renderOperator() {

@@ -112,7 +112,7 @@ export class MvcGrid {
         grid.controller = new AbortController();
         grid.isAjax = Boolean(element.dataset.url);
         grid.prefix = grid.name ? `${grid.name}-` : "";
-        grid.filterMode = <any>(element.dataset.filterMode|| "").toLowerCase();
+        grid.filterMode = <any>(element.dataset.filterMode || "").toLowerCase();
         element.dataset.id = options.id || MvcGrid.instances.length.toString();
         grid.url = element.dataset.url ? new URL(element.dataset.url, location.href) : new URL(location.href);
         grid.url = options.url ? new URL(options.url.toString(), location.href) : grid.url;
@@ -618,6 +618,7 @@ export class MvcGridPager {
     public showPageSizes: boolean;
     public rowsPerPage: HTMLInputElement;
     public pages: NodeListOf<HTMLElement>;
+    public totalRows: number;
 
     public constructor(grid: MvcGrid, element: HTMLElement) {
         const pager = this;
@@ -628,6 +629,7 @@ export class MvcGridPager {
         pager.showPageSizes = element.dataset.showPageSizes == "True";
         pager.rowsPerPage = element.querySelector<HTMLInputElement>(".mvc-grid-pager-rows")!;
         pager.currentPage = pager.pages.length ? element.querySelector<HTMLElement>(".active")!.dataset.page! : "1";
+        pager.totalRows = parseInt(element.querySelector<HTMLInputElement>(".mvc-grid-pager-totalRows")!.value);
 
         pager.cleanUp();
         pager.bind();
@@ -662,7 +664,10 @@ export class MvcGridPager {
         }
 
         pager.rowsPerPage.addEventListener("change", () => {
-            pager.apply("1");
+            let totalPages: number = pager.totalRows / parseInt(pager.rowsPerPage.value) + ((pager.totalRows % parseInt(pager.rowsPerPage.value)) > 0 ? 1 : 0);
+            pager.currentPage = Math.min(totalPages, parseInt(pager.currentPage)).toString();
+            pager.currentPage = Math.max(1, parseInt(pager.currentPage)).toString();
+            pager.apply(pager.currentPage);
         });
     }
 }
@@ -956,11 +961,11 @@ export class MvcGridFilter {
                     ${filter.renderFilter("first")}
                 </div>
                 ${filter.mode == "excel" && filter.type == "double"
-                    ? `${filter.renderOperator()}
+                ? `${filter.renderOperator()}
                     <div class="popup-filter">
                         ${filter.renderFilter("second")}
                     </div>`
-                    : ""}
+                : ""}
                 ${filter.renderActions()}`;
     }
     public renderFilter(name: "first" | "second"): string {
@@ -976,10 +981,10 @@ export class MvcGridFilter {
                     </select>
                 </div>
                 <div class="popup-group">${options
-                    ? `<select class="mvc-grid-value" data-filter="${name}"${multiple}>
+                ? `<select class="mvc-grid-value" data-filter="${name}"${multiple}>
                           ${options.innerHTML}
                        </select>`
-                    : `<input class="mvc-grid-value" data-filter="${name}">`}
+                : `<input class="mvc-grid-value" data-filter="${name}">`}
                 </div>`;
     }
     public renderOperator(): string {
