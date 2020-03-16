@@ -572,9 +572,10 @@ class MvcGridPager {
         }
 
         pager.rowsPerPage.addEventListener("change", () => {
-            var totalPages = pager.totalRows / pager.rowsPerPage.value + ((pager.totalRows % pager.rowsPerPage.value) > 0 ? 1 : 0);
-            pager.currentPage = Math.min(totalPages, pager.currentPage);
-            pager.currentPage = Math.max(1, pager.currentPage);
+            var totalPages = Math.ceil(pager.totalRows / pager.rowsPerPage.value);
+            if (totalPages < pager.currentPage) {
+                pager.currentPage = totalPages;
+            }
             pager.apply(pager.currentPage);
         });
     }

@@ -664,9 +664,10 @@ export class MvcGridPager {
         }
 
         pager.rowsPerPage.addEventListener("change", () => {
-            let totalPages: number = pager.totalRows / parseInt(pager.rowsPerPage.value) + ((pager.totalRows % parseInt(pager.rowsPerPage.value)) > 0 ? 1 : 0);
-            pager.currentPage = Math.min(totalPages, parseInt(pager.currentPage)).toString();
-            pager.currentPage = Math.max(1, parseInt(pager.currentPage)).toString();
+            let totalPages: number = Math.ceil(pager.totalRows / parseInt(pager.rowsPerPage.value));
+            if (totalPages < parseInt(pager.currentPage)) {
+                pager.currentPage = totalPages.toString();
+            }
             pager.apply(pager.currentPage);
         });
     }
